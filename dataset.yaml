@@ -1,0 +1,6 @@
+path: .
+train: dataset/images
+val: dataset/test/images
+
+names:
+  0: drink_cup

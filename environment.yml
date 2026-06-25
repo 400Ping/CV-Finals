@@ -1,0 +1,12 @@
+name: cv-cup-detector
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - cbor2
+  - "numpy<2"
+  - tqdm
+  - opencv
+  - pip:
+      - modal>=0.64
