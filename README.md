@@ -129,15 +129,3 @@ Precision: 0.760
 Recall: 0.844
 F1: 0.800
 ```
-
-實際數值會依標註品質、拍攝角度、低光源程度與訓練參數而不同。
-
-## GitHub 繳交方式
-
-建立公開 GitHub 倉庫後，將本專案完整上傳，並在作業繳交處提供倉庫連結。建議確認倉庫至少包含：
-
-- `Data/` 或 `dataset/images/`：自行收集的校園資料集
-- `dataset/labels/`：自行標註的 bounding box
-- `scripts/`：標註、訓練、偵測與評估程式
-- `README.md`：安裝與執行方式
-- `outputs/demo.mp4`：實際攝影機展示影片
