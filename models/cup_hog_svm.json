@@ -3,8 +3,8 @@
   "class": "drink_cup",
   "positive_samples_with_flip": 124,
   "random_negative_samples": 2480,
-  "hard_negative_samples": 298,
-  "negative_samples": 2778,
+  "hard_negative_samples": 0,
+  "negative_samples": 2480,
   "window_size": [
     128,
     128
