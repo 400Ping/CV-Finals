@@ -6,12 +6,12 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from common import Box, make_hog, non_max_suppression, preprocess_crop
+from common import Box, HOG_WINDOW_SIZE, make_hog, non_max_suppression
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run bottle detection on an image, video, or camera.")
-    parser.add_argument("--model", type=Path, default=Path("models/bottle_hog_svm.yml"))
+    parser = argparse.ArgumentParser(description="Run drink cup detection on an image, video, or camera.")
+    parser.add_argument("--model", type=Path, default=Path("models/cup_hog_svm.yml"))
     parser.add_argument("--source", default="0", help="Camera index, image path, or video path.")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--step", type=int, default=24)
@@ -23,18 +23,19 @@ def parse_args() -> argparse.Namespace:
 def detect_frame(frame: np.ndarray, svm: cv2.ml_SVM, step: int, score_threshold: float, nms_threshold: float) -> list[tuple[Box, float]]:
     hog = make_hog()
     frame_h, frame_w = frame.shape[:2]
+    win_w, win_h = HOG_WINDOW_SIZE
     boxes: list[Box] = []
     scores: list[float] = []
 
     scale = 1.0
     current = frame
-    while current.shape[0] >= 128 and current.shape[1] >= 64:
+    while current.shape[0] >= win_h and current.shape[1] >= win_w:
         gray = cv2.cvtColor(current, cv2.COLOR_BGR2GRAY)
         gray = cv2.equalizeHist(gray)
         h, w = gray.shape[:2]
-        for y in range(0, h - 128 + 1, step):
-            for x in range(0, w - 64 + 1, step):
-                crop = gray[y : y + 128, x : x + 64]
+        for y in range(0, h - win_h + 1, step):
+            for x in range(0, w - win_w + 1, step):
+                crop = gray[y : y + win_h, x : x + win_w]
                 feature = hog.compute(crop).reshape(1, -1).astype(np.float32)
                 _, pred = svm.predict(feature)
                 if int(pred[0, 0]) != 1:
@@ -47,8 +48,8 @@ def detect_frame(frame: np.ndarray, svm: cv2.ml_SVM, step: int, score_threshold:
                 box = Box(
                     int(x * inv),
                     int(y * inv),
-                    int((x + 64) * inv),
-                    int((y + 128) * inv),
+                    int((x + win_w) * inv),
+                    int((y + win_h) * inv),
                 ).clip(frame_w, frame_h)
                 boxes.append(box)
                 scores.append(score)
@@ -56,7 +57,7 @@ def detect_frame(frame: np.ndarray, svm: cv2.ml_SVM, step: int, score_threshold:
         scale /= 1.25
         new_w = int(frame_w * scale)
         new_h = int(frame_h * scale)
-        if new_w < 64 or new_h < 128:
+        if new_w < win_w or new_h < win_h:
             break
         current = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
 
@@ -70,7 +71,7 @@ def draw_detections(frame: np.ndarray, detections: list[tuple[Box, float]]) -> n
         cv2.rectangle(canvas, (box.x1, box.y1), (box.x2, box.y2), (0, 255, 0), 3)
         cv2.putText(
             canvas,
-            f"PET bottle {score:.2f}",
+            f"Drink cup {score:.2f}",
             (box.x1, max(24, box.y1 - 8)),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.7,
@@ -100,7 +101,7 @@ def main() -> None:
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
             cv2.imwrite(str(args.output), result)
-        cv2.imshow("Bottle detector", result)
+        cv2.imshow("Drink cup detector", result)
         cv2.waitKey(0)
         return
 
@@ -123,7 +124,7 @@ def main() -> None:
         result = draw_detections(frame, detect_frame(frame, svm, args.step, args.score_threshold, args.nms_threshold))
         if writer:
             writer.write(result)
-        cv2.imshow("Bottle detector", result)
+        cv2.imshow("Drink cup detector", result)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
 

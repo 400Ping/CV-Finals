@@ -9,7 +9,7 @@ from common import Box, iter_images, label_path_for, read_yolo_boxes, write_yolo
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Annotate PET bottle bounding boxes in YOLO text format.")
+    parser = argparse.ArgumentParser(description="Annotate drink cup bounding boxes in YOLO text format.")
     parser.add_argument("--images", type=Path, default=Path("dataset/images"))
     parser.add_argument("--labels", type=Path, default=Path("dataset/labels"))
     return parser.parse_args()

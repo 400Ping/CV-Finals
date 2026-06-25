@@ -9,6 +9,7 @@ import numpy as np
 
 
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp"}
+HOG_WINDOW_SIZE = (128, 128)
 
 
 @dataclass(frozen=True)
@@ -113,7 +114,7 @@ def non_max_suppression(boxes: list[Box], scores: list[float], threshold: float)
 
 def make_hog() -> cv2.HOGDescriptor:
     return cv2.HOGDescriptor(
-        _winSize=(64, 128),
+        _winSize=HOG_WINDOW_SIZE,
         _blockSize=(16, 16),
         _blockStride=(8, 8),
         _cellSize=(8, 8),
@@ -122,6 +123,6 @@ def make_hog() -> cv2.HOGDescriptor:
 
 
 def preprocess_crop(crop: np.ndarray) -> np.ndarray:
-    resized = cv2.resize(crop, (64, 128), interpolation=cv2.INTER_AREA)
+    resized = cv2.resize(crop, HOG_WINDOW_SIZE, interpolation=cv2.INTER_AREA)
     gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
     return cv2.equalizeHist(gray)

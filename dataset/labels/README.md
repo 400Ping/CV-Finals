@@ -6,7 +6,9 @@ Each `.txt` file uses YOLO bounding-box format:
 0 center_x center_y width height
 ```
 
-Run the annotator from the project root:
+Class `0` is the drink cup.
+
+Annotate the training images from the project root:
 
 ```bash
 python scripts/annotate.py --images dataset/images --labels dataset/labels

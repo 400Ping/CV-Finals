@@ -13,9 +13,16 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Evaluate detector precision and recall against YOLO labels.")
     parser.add_argument("--images", type=Path, default=Path("dataset/images"))
     parser.add_argument("--labels", type=Path, default=Path("dataset/labels"))
-    parser.add_argument("--model", type=Path, default=Path("models/bottle_hog_svm.yml"))
+    parser.add_argument("--model", type=Path, default=Path("models/cup_hog_svm.yml"))
     parser.add_argument("--iou", type=float, default=0.5)
     parser.add_argument("--step", type=int, default=24)
+    parser.add_argument("--score-threshold", type=float, default=0.0)
+    parser.add_argument("--nms-threshold", type=float, default=0.25)
+    parser.add_argument(
+        "--include-empty-images",
+        action="store_true",
+        help="Include images with no labels as negative test images and count their detections as false positives.",
+    )
     return parser.parse_args()
 
 
@@ -35,10 +42,26 @@ def main() -> None:
         height, width = image.shape[:2]
         ground_truth = read_yolo_boxes(label_path_for(image_path, args.labels), width, height)
         if not ground_truth:
+            if args.include_empty_images:
+                detections = detect_frame(
+                    image,
+                    svm,
+                    args.step,
+                    args.score_threshold,
+                    args.nms_threshold,
+                )
+                fp += len(detections)
+                labeled_images += 1
             continue
         labeled_images += 1
 
-        detections = detect_frame(image, svm, args.step, 0.0, 0.25)
+        detections = detect_frame(
+            image,
+            svm,
+            args.step,
+            args.score_threshold,
+            args.nms_threshold,
+        )
         matched = set()
         for pred_box, _score in detections:
             best_idx = -1
@@ -62,6 +85,8 @@ def main() -> None:
     f1 = 2 * precision * recall / (precision + recall) if precision + recall else 0.0
 
     print(f"Labeled images: {labeled_images}")
+    print(f"Score threshold: {args.score_threshold:.3f}")
+    print(f"NMS threshold: {args.nms_threshold:.3f}")
     print(f"TP: {tp}  FP: {fp}  FN: {fn}")
     print(f"Precision: {precision:.3f}")
     print(f"Recall: {recall:.3f}")
