@@ -9,7 +9,7 @@
 ├── Data/                  # 原始 HEIC 校園照片
 ├── dataset/
 │   ├── images/            # 已轉換成 OpenCV 可讀的 JPG 圖片
-│   └── labels/            # YOLO 格式標註檔，每張圖一個 .txt
+│   └── labels/            # 標註檔，每張圖一個 .txt
 ├── models/                # 訓練後的模型
 ├── outputs/               # 偵測輸出圖片或影片
 ├── scripts/
