@@ -1,0 +1,10 @@
+{
+  "detector": "OpenCV HOG + linear SVM",
+  "class": "pet_bottle",
+  "positive_samples_with_flip": 88,
+  "negative_samples": 1760,
+  "window_size": [
+    64,
+    128
+  ]
+}

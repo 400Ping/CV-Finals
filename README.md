@@ -1,6 +1,6 @@
 # 元智大學低光源垃圾分類輔助系統：寶特瓶物件偵測
 
-本專案以元智大學校園中的寶特瓶為偵測目標，使用自行拍攝的校園影像建立資料集，並以 OpenCV 的 HOG 特徵搭配線性 SVM 訓練一個寶特瓶物件偵測器。系統可對單張圖片、影片或即時攝影機畫面進行偵測，適合作為低光源垃圾分類輔助系統的前端偵測模組。
+本專案以元智大學校園中的寶特瓶為偵測目標，使用自行拍攝的校園影像建立資料集。資料集包含光線充足與低光源等不同亮度條件下的寶特瓶照片，並以 OpenCV 的 HOG 特徵搭配線性 SVM 訓練一個寶特瓶物件偵測器。系統可對單張圖片、影片或即時攝影機畫面進行偵測，適合作為低光源垃圾分類輔助系統的前端偵測模組。
 
 ## 專案結構
 
@@ -15,7 +15,6 @@
 ├── scripts/
 │   ├── convert_heic_macos.py # 將 HEIC 轉成 JPG
 │   ├── annotate.py        # 互動式標註工具
-│   ├── augment_low_light.py # 產生低光源增強資料
 │   ├── train_hog_svm.py   # 訓練 HOG + SVM 偵測器
 │   ├── detect.py          # 圖片、影片、攝影機偵測
 │   └── evaluate.py        # Precision / Recall / F1 評估
@@ -34,7 +33,7 @@ pip install -r requirements.txt
 
 ## 資料集與標註
 
-`Data/` 內保留原始 HEIC 照片，`dataset/images/` 內為轉換後的 JPG 版本。若需要重新轉換，可在 macOS 執行：
+`Data/` 內保留原始 HEIC 照片，`dataset/images/` 內為轉換後的 JPG 版本。這批照片由元智大學校園實際拍攝而來，包含日間光線充足、陰影處、室內或光線較不充足等不同亮度條件。若需要重新轉換，可在 macOS 執行：
 
 ```bash
 python scripts/convert_heic_macos.py --input Data --output dataset/images
@@ -62,14 +61,6 @@ python scripts/annotate.py --images dataset/images --labels dataset/labels
 - `u`：復原上一個框
 - `q`：儲存並離開
 
-若要加入低光源增強資料，可在完成標註後執行：
-
-```bash
-python scripts/augment_low_light.py --images dataset/images --labels dataset/labels
-```
-
-此指令會產生檔名包含 `_lowlight` 的暗光版本，並複製對應標註。
-
 ## 訓練
 
 完成標註後執行：
@@ -81,7 +72,7 @@ python scripts/train_hog_svm.py \
   --model models/bottle_hog_svm.yml
 ```
 
-訓練流程會從標註框擷取寶特瓶正樣本，並從不重疊區域隨機擷取負樣本，再訓練線性 SVM 分類器。
+訓練流程會從標註框擷取寶特瓶正樣本，並從不重疊區域隨機擷取負樣本，再訓練線性 SVM 分類器。由於訓練資料本身包含不同亮度條件，模型會直接從真實拍攝資料中學習光線充足與低光源場景下的寶特瓶外觀。
 
 ## 偵測
 
